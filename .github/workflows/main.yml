@@ -27,8 +27,15 @@ jobs:
             **/.git*/**
             **/node_modules/**
             **/.github/**
-            **/wp-content/**
+            **/_create/**
+            **/wp-content/updraft/**
+            **/wp-content/uploads/wp-import-export-lite/**
+            **/wp-content/uploads/elementor/**
             **/wp-config.php
-            **/wp-config-sample.php
-            **/.env
             **/.htaccess
+            **/wp-content/**
+            **/wp-content/cache/**
+            **/wp-content/ewww/**
+            **/wp-content/wflogs/**
+            **/wp-content/wp-rocket-config/**
+            **/wp-content/wflogs/config-livewaf.php
