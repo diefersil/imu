@@ -27,6 +27,8 @@ jobs:
 
           ARGS: "-rlgoDzvc -i"
 
+          SSH_CMD_ARGS: "-o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o IdentityAgent=none"
+
           EXCLUDE: "
             .git*,
             .git*/**,
