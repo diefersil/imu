@@ -1,0 +1,41 @@
+on:
+  push:
+    branches:
+      - main
+
+name: 🚀 Deploy website via SSH
+
+jobs:
+  web-deploy:
+    name: 🎉 Deploy SSH
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v4
+
+      - name: 📂 Sync files via SSH
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_USER: ${{ secrets.SSH_USER }}
+          REMOTE_PORT: ${{ secrets.SSH_PORT }}
+
+          SOURCE: "./"
+          TARGET: "/home4/guiaun34/imoveisunai.com.br/imu/"
+
+          ARGS: "-rlgoDzvc -i"
+
+          SSH_CMD_ARGS: "-o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o IdentityAgent=none"
+
+          EXCLUDE: "
+            .git*,
+            .git*/**,
+            node_modules/**,
+            .github/**,
+            _create/**,
+            wp-content/**,
+            wp-config.php,
+            .htaccess
+          "

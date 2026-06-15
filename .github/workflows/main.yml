@@ -3,39 +3,39 @@ on:
     branches:
       - main
 
-name: 🚀 Deploy website via SSH
+name: 🚀 Deploy website on push
 
 jobs:
   web-deploy:
-    name: 🎉 Deploy SSH
+    name: 🎉 Deploy
     runs-on: ubuntu-latest
 
     steps:
       - name: 🚚 Get latest code
         uses: actions/checkout@v4
 
-      - name: 📂 Sync files via SSH
-        uses: easingthemes/ssh-deploy@main
+      - name: 📂 Sync files
+        uses: SamKirkland/FTP-Deploy-Action@4.3.1
         with:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          REMOTE_HOST: ${{ secrets.SSH_HOST }}
-          REMOTE_USER: ${{ secrets.SSH_USER }}
-          REMOTE_PORT: ${{ secrets.SSH_PORT }}
+          server: ${{ secrets.ftp_host }}
+          username: ${{ secrets.ftp_user }}
+          password: ${{ secrets.ftp_password }}
+          server-dir: /imoveisunai.com.br/imu/
 
-          SOURCE: "./"
-          TARGET: "/home4/guiaun34/imoveisunai.com.br/imu/"
-
-          ARGS: "-rlgoDzvc -i"
-
-          SSH_CMD_ARGS: "-o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o IdentityAgent=none"
-
-          EXCLUDE: "
-            .git*,
-            .git*/**,
-            node_modules/**,
-            .github/**,
-            _create/**,
-            wp-content/**,
-            wp-config.php,
-            .htaccess
-          "
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.github/**
+            **/_create/**
+            **/wp-content/updraft/**
+            **/wp-content/uploads/wp-import-export-lite/**
+            **/wp-content/uploads/elementor/**
+            **/wp-config.php
+            **/.htaccess
+            **/wp-content/**
+            **/wp-content/cache/**
+            **/wp-content/ewww/**
+            **/wp-content/wflogs/**
+            **/wp-content/wp-rocket-config/**
+            **/wp-content/wflogs/config-livewaf.php
