@@ -1,0 +1,41 @@
+on:
+  push:
+    branches:
+      - main
+
+name: 🚀 Deploy website on push
+
+jobs:
+  web-deploy:
+    name: 🎉 Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v4
+
+      - name: 📂 Sync files
+        uses: SamKirkland/FTP-Deploy-Action@4.3.1
+        with:
+          server: ${{ secrets.ftp_host }}
+          username: ${{ secrets.ftp_user }}
+          password: ${{ secrets.ftp_password }}
+          server-dir: /imoveisunai.com.br/imu/
+
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.github/**
+            **/_create/**
+            **/wp-content/updraft/**
+            **/wp-content/uploads/wp-import-export-lite/**
+            **/wp-content/uploads/elementor/**
+            **/wp-config.php
+            **/.htaccess
+            **/wp-content/**
+            **/wp-content/cache/**
+            **/wp-content/ewww/**
+            **/wp-content/wflogs/**
+            **/wp-content/wp-rocket-config/**
+            **/wp-content/wflogs/config-livewaf.php

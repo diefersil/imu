@@ -3,39 +3,37 @@ on:
     branches:
       - main
 
-name: 🚀 Deploy website on push
+name: 🚀 Deploy website via SSH
 
 jobs:
   web-deploy:
-    name: 🎉 Deploy
+    name: 🎉 Deploy SSH
     runs-on: ubuntu-latest
 
     steps:
       - name: 🚚 Get latest code
         uses: actions/checkout@v4
 
-      - name: 📂 Sync files
-        uses: SamKirkland/FTP-Deploy-Action@4.3.1
+      - name: 📂 Sync files via SSH
+        uses: easingthemes/ssh-deploy@main
         with:
-          server: ${{ secrets.ftp_host }}
-          username: ${{ secrets.ftp_user }}
-          password: ${{ secrets.ftp_password }}
-          server-dir: /imoveisunai.com.br/imu/
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_USER: ${{ secrets.SSH_USER }}
+          REMOTE_PORT: ${{ secrets.SSH_PORT }}
 
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            **/.github/**
-            **/_create/**
-            **/wp-content/updraft/**
-            **/wp-content/uploads/wp-import-export-lite/**
-            **/wp-content/uploads/elementor/**
-            **/wp-config.php
-            **/.htaccess
-            **/wp-content/**
-            **/wp-content/cache/**
-            **/wp-content/ewww/**
-            **/wp-content/wflogs/**
-            **/wp-content/wp-rocket-config/**
-            **/wp-content/wflogs/config-livewaf.php
+          SOURCE: "./"
+          TARGET: "/home4/guiaun34/imoveisunai.com.br/imu/"
+
+          ARGS: "-rlgoDzvc -i"
+
+          EXCLUDE: "
+            .git*,
+            .git*/**,
+            node_modules/**,
+            .github/**,
+            _create/**,
+            wp-content/**,
+            wp-config.php,
+            .htaccess
+          "
