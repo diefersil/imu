@@ -39,3 +39,5 @@ jobs:
             **/wp-content/wflogs/**
             **/wp-content/wp-rocket-config/**
             **/wp-content/wflogs/config-livewaf.php
+
+            
