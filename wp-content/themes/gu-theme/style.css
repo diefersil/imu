@@ -1,0 +1,198 @@
+@charset "UTF-8";
+
+/*
+Theme Name: GU Theme 
+Theme URI: https://example.com
+Author: Diego Fernandes
+Author URI: https://wordpress.org/
+Description: Guia Unaí Theme
+Requires at least: 4+
+Tested up to: 4+
+Requires PHP: 8+
+Version: 2024
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: listing
+Tags: listing
+*/
+
+/* ==================================================
+   CSS RESET / BASE
+================================================== */
+
+html {
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ==================================================
+   FONTES GERAIS
+================================================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+span,
+p,
+ol,
+ul,
+form,
+input,
+select,
+textarea,
+label,
+.jet-filter-label,
+.elementor-shortcode,
+.jet-tabs__content-wrapper,
+.jet-tabs__label-text,
+.jet-toggle__label-text,
+.jet-listing-dynamic-field__content,
+.jet-filters-pagination__link,
+.jet-listing-dynamic-terms__link,
+.autocomplete-items {
+  /* font-family: "Mulish", Sans-serif !important; */
+  font-family: "Google Sans", sans-serif !important;
+}
+
+/* ==================================================
+   HEADER
+================================================== */
+
+.apply-filters__button {
+  cursor: pointer !important;
+}
+
+/* ==================================================
+   TITLE PAGES
+================================================== */
+
+.home .title-pages,
+.single .title-pages,
+.error404 .title-pages {
+  display: none !important;
+}
+
+/* ==================================================
+   BREADCRUMBS
+================================================== */
+
+.single-breadcrumb,
+.single-breadcrumb a,
+.single-breadcrumb span {
+  color: #ffffff !important;
+}
+
+/* ==================================================
+   LISTING
+================================================== */
+
+.elementor-8562 .loop-search-title h3,
+.location h4 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250ch;
+}
+
+/* ==================================================
+   JET ENGINE
+================================================== */
+
+.jet-listing-not-found {
+  margin: 20px 0 0 30px;
+}
+
+.charleft,
+.ginput_counter,
+.gfield_description,
+.warningTextareaInfo {
+  display: none !important;
+}
+
+/* ==================================================
+   SINGLE
+================================================== */
+
+.single-btn-mobile {
+  position: absolute !important;
+  top: 2px;
+  right: 25px;
+  width: 90px;
+  padding: 5px 0;
+  cursor: pointer;
+}
+
+.single hr {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border: 0;
+  border-top: 1px solid #eeeeee;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .single-title-mobile {
+    /* background: #dddddd !important; */
+  }
+}
+
+/* ==================================================
+   AUTOCOMPLETE
+================================================== */
+
+.autocomplete-items {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 99;
+
+  border: 1px solid #d4d4d4;
+  border-top: none;
+  border-bottom: none;
+}
+
+.autocomplete-items div {
+  padding: 10px;
+  cursor: pointer;
+  background-color: #ffffff;
+  border-bottom: 1px solid #d4d4d4;
+}
+
+.autocomplete-items div:hover {
+  background-color: #e9e9e9;
+}
+
+.autocomplete-active {
+  background-color: dodgerblue !important;
+  color: #ffffff;
+}
+
+/* ==================================================
+   DISPLAY AD
+================================================== */
+
+/*
+.ad {
+  display: none !important;
+}
+*/
