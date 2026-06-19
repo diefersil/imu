@@ -29,11 +29,10 @@ jobs:
             **/.github/**
             **/_create/**
             **/wp-content/updraft/**
-            **/wp-content/uploads/elementor/**
-             **/wp-content/uploads/elementor-pro/**
             **/wp-config.php
             **/.htaccess
             **/wp-content/uploads**
+            **/wp-content/plugins**
             **/wp-content/cache/**
             **/wp-content/ewww/**
             **/wp-content/wflogs/**

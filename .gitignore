@@ -2,8 +2,6 @@ _create/
 wp-content/updraft/
 wp-config.php
 .htaccess
-wp-content/plugins/elementor
-wp-content/plugins/elementor-pro
 wp-content/uploads
 wp-content/cache
 wp-content/ewww/
