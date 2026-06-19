@@ -29,16 +29,15 @@ jobs:
             **/.github/**
             **/_create/**
             **/wp-content/updraft/**
-            **/wp-content/uploads/wp-import-export-lite/**
             **/wp-content/uploads/elementor/**
+             **/wp-content/uploads/elementor-pro/**
             **/wp-config.php
             **/.htaccess
-            **/wp-content/plugins**
             **/wp-content/uploads**
             **/wp-content/cache/**
             **/wp-content/ewww/**
             **/wp-content/wflogs/**
             **/wp-content/wp-rocket-config/**
-            **/wp-content/wflogs/config-livewaf.php
+  
 
             
