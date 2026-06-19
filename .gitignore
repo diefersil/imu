@@ -5,6 +5,7 @@ wp-content/uploads/elementor/
 wp-config.php
 .htaccess
 wp-content/plugins
+wp-content/uploads
 wp-content/cache
 wp-content/ewww/
 /wp-content/wflogs/
