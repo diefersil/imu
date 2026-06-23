@@ -132,7 +132,7 @@ function normalizarUrlsSite($url) {
 
         foreach ($url as $itemUrl) {
 
-            $itemUrl = trim((string)$itemUrl);
+            $itemUrl = normalizarUrlConfig($itemUrl);
 
             if ($itemUrl !== "" && !in_array($itemUrl, $urls)) {
                 $urls[] = $itemUrl;
@@ -142,13 +142,63 @@ function normalizarUrlsSite($url) {
         return $urls;
     }
 
-    $url = trim((string)$url);
+    $url = normalizarUrlConfig($url);
 
     if ($url === "") {
         return [];
     }
 
     return [$url];
+}
+
+/**
+ * NORMALIZAR URL DO CONFIG
+ *
+ * Se a URL vier sem http/https, adiciona https:// automaticamente.
+ */
+function normalizarUrlConfig($url) {
+
+    $url = trim((string)$url);
+
+    if ($url === "") {
+        return "";
+    }
+
+    if (preg_match('/^www\./i', $url)) {
+        return "https://" . $url;
+    }
+
+    if (!preg_match('/^https?:\/\//i', $url)) {
+        return "https://" . ltrim($url, "/");
+    }
+
+    return $url;
+}
+
+
+/**
+ * PEGAR URL PRINCIPAL SEM BARRA FINAL
+ *
+ * Exemplo:
+ * https://site.com.br/imoveis/page/2
+ * vira:
+ * https://site.com.br
+ */
+function getUrlPrincipalSemBarra($url) {
+
+    $url = trim((string)$url);
+
+    if ($url === "") {
+        return "";
+    }
+
+    $partes = parse_url($url);
+
+    if (empty($partes["scheme"]) || empty($partes["host"])) {
+        return rtrim($url, "/");
+    }
+
+    return rtrim($partes["scheme"] . "://" . $partes["host"], "/");
 }
 
 /**
@@ -1320,6 +1370,10 @@ function gerarChaveRegistro($item) {
 
 /**
  * LER CSV EXISTENTE
+ *
+ * Lê o CSV usando o cabeçalho real do arquivo.
+ * Isso evita desalinhamento quando colunas forem renomeadas,
+ * removidas ou adicionadas.
  */
 function lerCsvExistente($arquivoCsv, $colunas) {
 
@@ -1346,12 +1400,47 @@ function lerCsvExistente($arquivoCsv, $colunas) {
         $cabecalho[0] = preg_replace('/^\xEF\xBB\xBF/', '', $cabecalho[0]);
     }
 
+    $cabecalho = array_map(function ($coluna) {
+        return trim((string)$coluna);
+    }, $cabecalho);
+
     while (($linha = fgetcsv($fp, 0, ";")) !== false) {
 
         $item = [];
 
-        foreach ($colunas as $index => $coluna) {
-            $item[$coluna] = $linha[$index] ?? "";
+        foreach ($cabecalho as $index => $nomeColuna) {
+            if ($nomeColuna !== "") {
+                $item[$nomeColuna] = $linha[$index] ?? "";
+            }
+        }
+
+        /**
+         * Compatibilidade com CSV antigo.
+         */
+        if (!isset($item["negociacao"]) && isset($item["status_imovel"])) {
+            $item["negociacao"] = $item["status_imovel"];
+        }
+
+        if (!isset($item["contato_fone"]) && isset($item["contato"])) {
+            $item["contato_fone"] = $item["contato"];
+        }
+
+        if (!isset($item["card_area_contruida"]) && isset($item["card_area2"])) {
+            $item["card_area_contruida"] = $item["card_area2"];
+        }
+
+        if (!isset($item["data_expiracao"]) && isset($item["data_periodo_timestamp"])) {
+            $item["data_expiracao"] = $item["data_periodo_timestamp"];
+        }
+
+        if (!isset($item["contato_nome"])) {
+            $item["contato_nome"] = "";
+        }
+
+        foreach ($colunas as $coluna) {
+            if (!array_key_exists($coluna, $item)) {
+                $item[$coluna] = "";
+            }
         }
 
         $registros[] = $item;
@@ -1399,7 +1488,7 @@ function mesclarRegistrosLimitados($registrosAntigos, $registrosNovos, $limite) 
 
         $item["data_ultimo_scraper_brasil"] = date("d/m/Y H:i:s");
         $item["data_ultimo_scraper_eua"] = date("Y-m-d H:i:s");
-        $item["data_periodo_timestamp"] = gerarDataPeriodoTimestamp($item["data_primeiro_scraper_eua"] ?? "", $periodoDias);
+        $item["data_expiracao"] = gerarDataPeriodoTimestamp($item["data_primeiro_scraper_eua"] ?? "", $periodoDias);
 
         unset($item["_periodo_dias"]);
 
@@ -1418,6 +1507,7 @@ $logs = [];
 foreach ($sites as $site) {
 
     $nomeSite = $site["nome_site"] ?? "";
+    $contatoNome = $site["contato_nome"] ?? "";
     $usuario = $site["usuario"] ?? "";
     $cidade = $site["cidade"] ?? "";
     $uf = $site["uf"] ?? "";
@@ -1425,13 +1515,16 @@ foreach ($sites as $site) {
     $categoria = normalizarListaVirgula($site["categoria"] ?? "");
     $tags = normalizarListaVirgula($site["tags"] ?? "");
 
-    $contato = $site["contato"] ?? "";
+    $contatoFone = $site["contato_fone"] ?? ($site["contato"] ?? "");
+    $contatoWhatsapp = $site["contato_whatsapp"] ?? "";
+    $contatoInstagram = $site["contato_instagram"] ?? "";
+    $contatoDesc = $site["contato_desc"] ?? "";
 
     $periodo = (int)($site["periodo"] ?? 0);
-    $dataPeriodoEua = gerarDataPeriodoEua($periodo);
 
     $urlsSite = normalizarUrlsSite($site["url"] ?? "");
     $urlPrincipal = $urlsSite[0] ?? "";
+    $contatoSite = getUrlPrincipalSemBarra($urlPrincipal);
 
     $numeroRegistros = (int)($site["numero_registros"] ?? 0);
 
@@ -1488,6 +1581,7 @@ foreach ($sites as $site) {
 
     $contador = 0;
     $ignoradosPorString = 0;
+    $registrosInvalidos = 0;
     $cardsEncontradosTotal = 0;
     $registrosPorUrl = [];
 
@@ -1596,9 +1690,33 @@ foreach ($sites as $site) {
 
             $ufFinal = !empty($uf) ? $uf : $cardUf;
 
+            $cardContatoNome = "";
+
+            if (empty($contatoNome)) {
+                $cardContatoNome = getTextoSeletor(
+                    $xpath,
+                    $card,
+                    $seletores["card_contato_nome"] ?? ""
+                );
+            }
+
+            $contatoNomeFinal = !empty($contatoNome) ? $contatoNome : $cardContatoNome;
+
+            $cardContatoWhatsapp = "";
+
+            if (empty($contatoWhatsapp)) {
+                $cardContatoWhatsapp = getTextoSeletor(
+                    $xpath,
+                    $card,
+                    $seletores["card_contato_whatsapp"] ?? ""
+                );
+            }
+
+            $contatoWhatsappFinal = !empty($contatoWhatsapp) ? $contatoWhatsapp : $cardContatoWhatsapp;
+
             $cardContato = "";
 
-            if (empty($contato)) {
+            if (empty($contatoFone)) {
                 $cardContato = getTextoSeletor(
                     $xpath,
                     $card,
@@ -1606,7 +1724,7 @@ foreach ($sites as $site) {
                 );
             }
 
-            $contatoFinal = !empty($contato) ? $contato : $cardContato;
+            $contatoFoneFinal = !empty($contatoFone) ? $contatoFone : $cardContato;
 
             $cardLocalizacao = getTextoSeletor(
                 $xpath,
@@ -1630,6 +1748,18 @@ foreach ($sites as $site) {
                     $cardLocalizacao = $ufFinal;
                 }
             }
+
+            $cardArea = getTextoSeletor(
+                $xpath,
+                $card,
+                $seletores["card_area"] ?? ""
+            );
+
+            $cardAreaContruida = getTextoSeletor(
+                $xpath,
+                $card,
+                $seletores["card_area_contruida"] ?? ""
+            );
 
             $categoriaImovel = definirCategoriaImovel(
                 $cardNome,
@@ -1689,26 +1819,79 @@ foreach ($sites as $site) {
              */
             $descricao = limparDescricaoCsv($descricao);
 
-            $statusImovel = definirStatusImovel(
+            $negociacao = definirStatusImovel(
                 $cardNome,
                 $descricao,
                 $StatusImovelRegras
             );
 
+            /**
+             * VALIDAÇÃO DO REGISTRO
+             *
+             * Se faltar nome, preço, galeria ou categoria do imóvel,
+             * o registro é considerado inválido e não é salvo no CSV.
+             */
+            $motivosInvalidos = [];
+
+            if (trim((string)$cardNome) === "") {
+                $motivosInvalidos[] = "nome_vazio";
+            }
+
+            if (trim((string)$preco) === "") {
+                $motivosInvalidos[] = "preco_vazio";
+            }
+
+            if (trim((string)$galeria) === "") {
+                $motivosInvalidos[] = "galeria_vazia";
+            }
+
+            if (trim((string)$categoriaImovel) === "") {
+                $motivosInvalidos[] = "categoria_imovel_vazia";
+            }
+
+            if (!empty($motivosInvalidos)) {
+
+                $registrosInvalidos++;
+
+                $logs[] = [
+                    "nome_site" => $nomeSite,
+                    "usuario" => $usuario,
+                    "cidade" => $cidadeFinal,
+                    "uf" => $ufFinal,
+                    "url" => $url,
+                    "status" => "registro_invalido",
+                    "motivos" => $motivosInvalidos,
+                    "card_nome" => $cardNome,
+                    "card_url" => $cardUrl,
+                    "preco" => $preco,
+                    "galeria" => $galeria,
+                    "categoria_imovel" => $categoriaImovel
+                ];
+
+                continue;
+            }
+
             $hash = md5(
                 mb_strtolower(
                     $nomeSite . "|" .
+                    $contatoNomeFinal . "|" .
                     $usuario . "|" .
                     $cidadeFinal . "|" .
                     $ufFinal . "|" .
                     $categoria . "|" .
                     $tags . "|" .
                     $categoriaImovel . "|" .
-                    $statusImovel . "|" .
-                    $contatoFinal . "|" .
+                    $negociacao . "|" .
+                    $contatoFoneFinal . "|" .
+                    $contatoWhatsappFinal . "|" .
+                    $contatoInstagram . "|" .
+                    $contatoDesc . "|" .
+                    $contatoSite . "|" .
                     $periodo . "|" .
                     $cardNome . "|" .
                     $cardLocalizacao . "|" .
+                    $cardArea . "|" .
+                    $cardAreaContruida . "|" .
                     $preco . "|" .
                     $cardUrl,
                     "UTF-8"
@@ -1721,22 +1904,25 @@ foreach ($sites as $site) {
 
             $resultados[$hash] = [
                 "nome_site" => $nomeSite,
+                "contato_nome" => $contatoNomeFinal,
                 "usuario" => $usuario,
                 "cidade" => $cidadeFinal,
                 "uf" => $ufFinal,
                 "categoria" => $categoria,
                 "tags" => $tags,
                 "categoria_imovel" => $categoriaImovel,
-                "status_imovel" => $statusImovel,
+                "negociacao" => $negociacao,
 
-                "contato" => $contatoFinal,
-
-                "data_periodo_eua" => $dataPeriodoEua,
-
-                "url" => $url,
+                "contato_fone" => $contatoFoneFinal,
+                "contato_whatsapp" => $contatoWhatsappFinal,
+                "contato_instagram" => $contatoInstagram,
+                "contato_site" => $contatoSite,
+                "contato_desc" => $contatoDesc,
 
                 "card_nome" => $cardNome,
                 "card_localizacao" => $cardLocalizacao,
+                "card_area" => $cardArea,
+                "card_area_contruida" => $cardAreaContruida,
                 "descricao" => $descricao,
                 "preco" => $preco,
                 "card_imagem_url" => $cardImagemUrl,
@@ -1754,7 +1940,7 @@ foreach ($sites as $site) {
                 "data_ultimo_scraper_brasil" => date("d/m/Y H:i:s"),
                 "data_ultimo_scraper_eua" => date("Y-m-d H:i:s"),
 
-                "data_periodo_timestamp" => gerarDataPeriodoTimestamp(date("Y-m-d H:i:s"), $periodo),
+                "data_expiracao" => gerarDataPeriodoTimestamp(date("Y-m-d H:i:s"), $periodo),
                 "_periodo_dias" => $periodo
             ];
 
@@ -1779,6 +1965,7 @@ foreach ($sites as $site) {
         "numero_registros" => $numeroRegistros,
         "numero_maximo_por_url" => $numeroMaximoPorUrl,
         "registros_salvos" => $contador,
+        "registros_invalidos" => $registrosInvalidos,
         "registros_por_url" => $registrosPorUrl,
         "ignorados_por_string" => $ignoradosPorString
     ];
@@ -1878,21 +2065,25 @@ function limparDescricaoCsv($html) {
  */
 $colunas = [
     "nome_site",
+    "contato_nome",
     "usuario",
     "cidade",
     "uf",
     "categoria",
     "tags",
     "categoria_imovel",
-    "status_imovel",
+    "negociacao",
 
-    "contato",
-    "data_periodo_eua",
-
-    "url",
+    "contato_fone",
+    "contato_whatsapp",
+    "contato_instagram",
+    "contato_site",
+    "contato_desc",
 
     "card_nome",
     "card_localizacao",
+    "card_area",
+    "card_area_contruida",
     "descricao",
     "preco",
     "card_imagem_url",
@@ -1910,7 +2101,7 @@ $colunas = [
     "data_ultimo_scraper_brasil",
     "data_ultimo_scraper_eua",
 
-    "data_periodo_timestamp"
+    "data_expiracao"
 ];
 
 /**

@@ -7,13 +7,17 @@
  */
 $sites = [
     [
-        "nome_site" => "Prime Imóveis - Locação",
+        "nome_site" => "Prime Imóveis",
+        "contato_nome" => "Prime Imóveis",
         "usuario" => "imoveisunai",
         "cidade" => "Unaí",
         "uf" => "MG",
         "categoria" => "",
         "tags" => "",
-        "contato" => "(38) 99970-6070",
+        "contato_fone" => "(38) 99970-6070",
+        "contato_whatsapp" => "(38) 99970-6070",
+        "contato_instagram" => "",
+        "contato_desc" => "",
         "periodo" => 30,
         "url" => [
             "https://primeimoveisunai.com.br/imoveis",
@@ -23,7 +27,7 @@ $sites = [
         "numero_registros" => 20,
         "numero_maximo_por_url" => 10,
         "frequencia" => [
-            "tipo" => "sempre",
+            "tipo" => "nunca",
             "horario_inicio" => "00:00",
             "horario_fim" => "02:00"
         ],
@@ -34,7 +38,11 @@ $sites = [
             "card_cidade" => "",
             "card_uf" => "",
             "card_contato" => "",
+            "card_contato_nome" => "",
+            "card_contato_whatsapp" => "",
             "card_localizacao" => "",
+            "card_area" => "",
+            "card_area_contruida" => "",
             "preco" => ".//div[contains(@class,'property-price')]//span",
             "card_imagem_url" => ".//img[contains(@class,'img-fluid')]",
             "card_url" => ".//a",
@@ -45,19 +53,23 @@ $sites = [
 
     [
         "nome_site" => "Terra Fértil",
+        "contato_nome" => "Terra Fértil",
         "usuario" => "imoveisunai",
         "cidade" => "Unaí",
         "uf" => "MG",
         "categoria" => "",
         "tags" => "",
-        "contato" => "(38) 99958-5454",
+        "contato_fone" => "(38) 99958-5454",
+        "contato_whatsapp" => "(38) 99958-5454",
+        "contato_instagram" => "",
+        "contato_desc" => "",
         "periodo" => 30,
         "url" => [
             "https://www.terrafertilimobiliaria.com.br/imoveis",
             "https://www.terrafertilimobiliaria.com.br/imoveis/a-venda",
             "https://www.terrafertilimobiliaria.com.br/imoveis/para-alugar",
             "https://www.terrafertilimobiliaria.com.br/imoveis/novos",
-            "www.terrafertilimobiliaria.com.br/imoveis/a-venda/fazenda"
+            "https://www.terrafertilimobiliaria.com.br/imoveis/a-venda/fazenda"
         ],
         "numero_registros" => 15,
         "numero_maximo_por_url" => 3,
@@ -73,7 +85,11 @@ $sites = [
             "card_cidade" => "",
             "card_uf" => "",
             "card_contato" => "",
+            "card_contato_nome" => "",
+            "card_contato_whatsapp" => "",
             "card_localizacao" => ".//h2[contains(@class,'card-with-buttons__heading')]",
+            "card_area" => "",
+            "card_area_contruida" => "",
             "preco" => ".//*[contains(@class,'card-with-buttons__value')]",
             "card_imagem_url" => ".//li[contains(@class,'cards_digital_carousel-item-0')]//img",
             "card_url" => ".",
@@ -83,13 +99,17 @@ $sites = [
     ],
 
     [
-        "nome_site" => "Sucesso Imóveis - Geral",
+        "nome_site" => "Sucesso Imóveis",
+        "contato_nome" => "Sucesso Imóveis",
         "usuario" => "imoveisunai",
         "cidade" => "Unaí",
         "uf" => "MG",
         "categoria" => "",
         "tags" => "",
-        "contato" => "(38) 99935-9555",
+        "contato_fone" => "(38) 99935-9555",
+        "contato_whatsapp" => "(38) 99935-9555",
+        "contato_instagram" => "",
+        "contato_desc" => "",
         "periodo" => 30,
         "url" => [
             "https://sucessoimoveis.imb.br/imoveis",
@@ -99,7 +119,7 @@ $sites = [
         "numero_registros" => 30,
         "numero_maximo_por_url" => 10,
         "frequencia" => [
-            "tipo" => "horario",
+            "tipo" => "nunca",
             "horario_inicio" => "04:00",
             "horario_fim" => "06:00"
         ],
@@ -110,7 +130,11 @@ $sites = [
             "card_cidade" => "",
             "card_uf" => "",
             "card_contato" => "",
+            "card_contato_nome" => "",
+            "card_contato_whatsapp" => "",
             "card_localizacao" => "",
+            "card_area" => "",
+            "card_area_contruida" => "",
             "preco" => ".//span[contains(@class,'g5ere__lpp-price')]",
             "card_imagem_url" => ".//div[contains(@class,'g5ere__property-featured')]//a[contains(@style,'background-image')]",
             "card_url" => ".//a[contains(@class,'g5core__entry-thumbnail')]",
@@ -121,12 +145,16 @@ $sites = [
 
     [
         "nome_site" => "Área 38",
+        "contato_nome" => "",
         "usuario" => "imoveisunai",
         "cidade" => "Paracatu",
         "uf" => "MG",
         "categoria" => "",
         "tags" => "",
-        "contato" => "(38) 3671-0038",
+        "contato_fone" => "(38) 3671-0038",
+        "contato_whatsapp" => "(38) 3671-0038",
+        "contato_instagram" => "",
+        "contato_desc" => "",
         "periodo" => 30,
         "url" => [
             "https://area38.com.br/busca?tipo=Fazenda",
@@ -143,7 +171,11 @@ $sites = [
             "card_cidade" => "",
             "card_uf" => "",
             "card_contato" => "",
+            "card_contato_nome" => "",
+            "card_contato_whatsapp" => "",
             "card_localizacao" => ".//div[contains(@class,'container-endereco')]//span",
+            "card_area" => "",
+            "card_area_contruida" => "",
             "preco" => ".//h5[contains(@class,'text-lg')]",
             "card_imagem_url" => ".//img[contains(@class,'w-full')]",
             "card_url" => ".",
@@ -154,12 +186,16 @@ $sites = [
 
     [
         "nome_site" => "Morado Imóveis",
+        "contato_nome" => "",
         "usuario" => "imoveisunai",
         "cidade" => "Paracatu",
         "uf" => "MG",
         "categoria" => "",
         "tags" => "",
-        "contato" => "(38) 99856-5306",
+        "contato_fone" => "(38) 99856-5306",
+        "contato_whatsapp" => "(38) 99856-5306",
+        "contato_instagram" => "",
+        "contato_desc" => "",
         "periodo" => 30,
         "url" => [
             "https://moradoimoveis.com.br/busca",
@@ -170,7 +206,7 @@ $sites = [
         "numero_registros" => 48,
         "numero_maximo_por_url" => 12,
         "frequencia" => [
-            "tipo" => "horario",
+            "tipo" => "nunca",
             "horario_inicio" => "23:00",
             "horario_fim" => "12:00"
         ],
@@ -181,7 +217,11 @@ $sites = [
             "card_cidade" => "",
             "card_uf" => "",
             "card_contato" => "",
+            "card_contato_nome" => "",
+            "card_contato_whatsapp" => "",
             "card_localizacao" => ".//div[contains(@class,'container-endereco')]//span",
+            "card_area" => "",
+            "card_area_contruida" => "",
             "preco" => ".//span[contains(@class,'ValorMoeda')]",
             "card_imagem_url" => ".//img[contains(@class,'BannerImage')]",
             "card_url" => ".//a",
@@ -192,12 +232,16 @@ $sites = [
 
     [
         "nome_site" => "Novo Lar",
+        "contato_nome" => "",
         "usuario" => "imoveisunai",
         "cidade" => "Unaí",
         "uf" => "MG",
         "categoria" => "",
         "tags" => "",
-        "contato" => "(38) 99879-9441",
+        "contato_fone" => "(38) 99879-9441",
+        "contato_whatsapp" => "(38) 99879-9441",
+        "contato_instagram" => "",
+        "contato_desc" => "",
         "periodo" => 30,
         "url" => [
             "https://novolarimobiliariaunai.com.br/imoveis/",
@@ -208,7 +252,7 @@ $sites = [
         "numero_registros" => 40,
         "numero_maximo_por_url" => 12,
         "frequencia" => [
-            "tipo" => "horario",
+            "tipo" => "nunca",
             "horario_inicio" => "04:00",
             "horario_fim" => "06:00"
         ],
@@ -219,7 +263,11 @@ $sites = [
             "card_cidade" => "",
             "card_uf" => "",
             "card_contato" => "",
+            "card_contato_nome" => "",
+            "card_contato_whatsapp" => "",
             "card_localizacao" => ".//div[contains(@class,'container-endereco')]//span",
+            "card_area" => "",
+            "card_area_contruida" => "",
             "preco" => ".//div[contains(@class,'valor')]//h5",
             "card_imagem_url" => ".//div[contains(@class,'foto')]//img",
             "card_url" => ".",

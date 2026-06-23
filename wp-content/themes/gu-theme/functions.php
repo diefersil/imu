@@ -164,6 +164,141 @@ function corta_titulo() {
 
 // add_action( 'wp_footer', 'corta_titulo' );
 
+/* ============================================================
+ * 10. Preço
+ * ============================================================ */
+
+
+add_action( 'wp_footer', 'preco' );
+
+function preco() {
+    ?>
+    <script>
+    (function () {
+
+        function formatarNumeroBR(texto) {
+            if (!texto) return texto;
+
+            // Remove R$, espaços e pega apenas a parte inteira antes da vírgula
+            let valor = texto
+                .replace('R$', '')
+                .trim()
+                .split(',')[0]
+                .replace(/\D/g, '');
+
+            if (!valor) return texto;
+
+            return Number(valor).toLocaleString('pt-BR', {
+                maximumFractionDigits: 0
+            });
+        }
+
+        function formatarElementoPreco(elemento, comReal) {
+            if (!elemento || elemento.dataset.precoFormatado === '1') {
+                return;
+            }
+
+            let walker = document.createTreeWalker(
+                elemento,
+                NodeFilter.SHOW_TEXT,
+                {
+                    acceptNode: function (node) {
+                        return /\d/.test(node.nodeValue)
+                            ? NodeFilter.FILTER_ACCEPT
+                            : NodeFilter.FILTER_SKIP;
+                    }
+                }
+            );
+
+            let textoNode = walker.nextNode();
+
+            if (!textoNode) return;
+
+            let numeroFormatado = formatarNumeroBR(textoNode.nodeValue);
+
+            if (!numeroFormatado) return;
+
+            textoNode.nodeValue = comReal ? 'R$ ' + numeroFormatado : numeroFormatado;
+
+            elemento.dataset.precoFormatado = '1';
+        }
+
+        function aplicarFormatacaoPrecos() {
+            let precosSemReal = document.querySelectorAll('.preco');
+            let precosComReal = document.querySelectorAll('.preco2');
+
+            if (!precosSemReal.length && !precosComReal.length) {
+                return;
+            }
+
+            precosSemReal.forEach(function (item) {
+                formatarElementoPreco(item, false);
+            });
+
+            precosComReal.forEach(function (item) {
+                formatarElementoPreco(item, true);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', aplicarFormatacaoPrecos);
+        window.addEventListener('load', aplicarFormatacaoPrecos);
+
+    })();
+    </script>
+    <?php
+}
+
+/* ============================================================
+ * 11. SHORTCODE WHATSAPP
+ * ============================================================ */
+
+
+/// Shortcode: [whatsapp_imovel_url]
+function imu_whatsapp_imovel_url_shortcode() {
+
+    $post_id = get_the_ID();
+
+    if ( ! $post_id ) {
+        return '';
+    }
+
+    if ( get_post_type( $post_id ) !== 'imoveis' ) {
+        return '';
+    }
+
+    // Campos do CPT imoveis
+    $phone        = get_post_meta( $post_id, 'contato_fone', true );
+    $contato_nome = get_post_meta( $post_id, 'contato_nome', true );
+
+    $post_title = get_the_title( $post_id );
+
+    if ( empty( $phone ) ) {
+        return '';
+    }
+
+    // Remove tudo que não for número
+    $phone = preg_replace( '/\D+/', '', $phone );
+
+    // Adiciona código do Brasil caso não tenha
+    if ( substr( $phone, 0, 2 ) !== '55' ) {
+        $phone = '55' . $phone;
+    }
+
+    // Mensagem do WhatsApp
+    if ( empty( $contato_nome ) ) {
+        $msg = 'Olá. Vi seu imóvel: ' . $post_title . ', no site Imóveis Unaí e gostaria de saber mais informações.';
+    } else {
+        $msg = 'Olá, ' . $contato_nome . '. Vi seu imóvel: ' . $post_title . ', no site Imóveis Unaí e gostaria de saber mais informações.';
+    }
+
+    // URL final
+    $url = 'https://wa.me/' . $phone . '?text=' . rawurlencode( $msg );
+
+    // Retorna somente a URL
+    return esc_url( $url );
+}
+add_shortcode( 'whatsapp_imovel_url', 'imu_whatsapp_imovel_url_shortcode' );
+
 
 /* ============================================================
  * 11. FUNÇÃO JS PARA CORTAR TEXTO - DESATIVADO
