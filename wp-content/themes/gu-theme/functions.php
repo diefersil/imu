@@ -947,8 +947,10 @@ add_action( 'wp_footer', function() {
 
             document.head.insertAdjacentHTML('beforeend', `
                 <style>
-                    .elementor-27881 .elementor-element.elementor-element-fd988c8 .swiper-wrapper {
-                        justify-content: center !important;
+                    @media(min-width:700px){
+                        .elementor-27881 .elementor-element.elementor-element-fd988c8 .swiper-wrapper {
+                            justify-content: center !important;
+                        }
                     }
                 </style>
             `);
