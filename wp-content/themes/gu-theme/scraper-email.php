@@ -309,6 +309,50 @@ function formatarListaResumoEmail($titulo, $itens) {
     return $texto;
 }
 
+
+/**
+ * FORMATAR SITES QUE RODARAM OU FORAM IGNORADOS NO RESUMO
+ */
+function formatarSitesExecucaoResumoEmail($titulo, $sites) {
+
+    $texto = $titulo . "\n";
+
+    if (empty($sites) || !is_array($sites)) {
+        return $texto . "- Nenhum site\n";
+    }
+
+    foreach ($sites as $site) {
+
+        $nomeSite = limpar($site["nome_site"] ?? "Site não informado");
+        $tipoFrequencia = limpar($site["tipo_frequencia"] ?? "");
+        $horarioInicio = limpar($site["horario_inicio"] ?? "");
+        $horarioFim = limpar($site["horario_fim"] ?? "");
+        $status = limpar($site["status"] ?? "");
+
+        if ($nomeSite === "") {
+            $nomeSite = "Site não informado";
+        }
+
+        $linha = "- " . $nomeSite;
+
+        if ($tipoFrequencia !== "") {
+            $linha .= " | frequência: " . $tipoFrequencia;
+        }
+
+        if ($horarioInicio !== "" || $horarioFim !== "") {
+            $linha .= " | horário configurado: " . ($horarioInicio !== "" ? $horarioInicio : "--:--") . " até " . ($horarioFim !== "" ? $horarioFim : "--:--");
+        }
+
+        if ($status !== "") {
+            $linha .= " | status: " . $status;
+        }
+
+        $texto .= $linha . "\n";
+    }
+
+    return $texto;
+}
+
 /**
  * ENVIAR E-MAIL COM RESUMO DA EXECUÇÃO DO SCRAPER
  *
@@ -356,6 +400,8 @@ function enviarEmailResumoScraperRealizado($resumoScraper, $emailDestino) {
 
     $statusLogs = contarStatusLogsScraper($logs);
     $resultadosPorSite = contarResultadosPorSiteScraper($resultados);
+    $sitesExecutadosScraper = $resumoScraper["sites_executados_scraper"] ?? [];
+    $sitesIgnoradosPorFrequencia = $resumoScraper["sites_ignorados_por_frequencia"] ?? [];
 
     $mensagem = "Resumo do scraper realizado.\n\n";
     $mensagem .= "Data da execução: " . $dataExecucao . "\n";

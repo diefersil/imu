@@ -2150,6 +2150,8 @@ validarExtensoesObrigatoriasScraper();
  */
 $resultados = [];
 $logs = [];
+$sitesExecutadosScraper = [];
+$sitesIgnoradosPorFrequencia = [];
 
 foreach ($sites as $site) {
 
@@ -2194,23 +2196,37 @@ foreach ($sites as $site) {
 
     $verificarString = $site["verificar_string"] ?? "";
 
+    $infoExecucaoSite = [
+        "nome_site" => $nomeSite,
+        "usuario" => $usuario,
+        "usuario_email" => $usuarioEmail,
+        "cidade" => $cidade,
+        "uf" => $uf,
+        "tipo_frequencia" => $frequencia["tipo"] ?? "sempre",
+        "horario_inicio" => $frequencia["horario_inicio"] ?? "",
+        "horario_fim" => $frequencia["horario_fim"] ?? "",
+        "horario_atual" => date("H:i")
+    ];
+
     if (!deveRodarAgora($frequencia)) {
 
-        $logs[] = [
-            "nome_site" => $nomeSite,
-            "usuario" => $usuario,
-            "usuario_email" => $usuarioEmail,
-            "cidade" => $cidade,
-            "uf" => $uf,
+        $sitesIgnoradosPorFrequencia[] = array_merge($infoExecucaoSite, [
+            "status" => "ignorado_por_frequencia"
+        ]);
+
+        $logs[] = array_merge($infoExecucaoSite, [
             "categoria" => $categoria,
             "tags" => $tags,
             "url" => $urlPrincipal,
-            "status" => "ignorado_por_frequencia",
-            "horario_atual" => date("H:i")
-        ];
+            "status" => "ignorado_por_frequencia"
+        ]);
 
         continue;
     }
+
+    $sitesExecutadosScraper[] = array_merge($infoExecucaoSite, [
+        "status" => "executado"
+    ]);
 
     if (empty($urlsSite)) {
 
@@ -3017,6 +3033,8 @@ $retornoJson = [
     "data_execucao" => date("d/m/Y H:i:s"),
     "horario_atual" => date("H:i"),
     "total_sites" => count($sites),
+    "total_sites_executados_scraper" => count($sitesExecutadosScraper),
+    "total_sites_ignorados_por_frequencia" => count($sitesIgnoradosPorFrequencia),
     "total_resultados_novos" => count($resultados),
     "total_resultados_csv" => count($registrosFinais),
     "total_usuarios_csv" => count($registrosUsuarios),
@@ -3028,6 +3046,8 @@ $retornoJson = [
     "total_imagens_baixadas" => $totalImagensBaixadas,
     "total_imagens_ja_existiam" => $totalImagensJaExistiam,
     "total_erros_imagens" => $totalErrosImagens,
+    "sites_executados_scraper" => $sitesExecutadosScraper,
+    "sites_ignorados_por_frequencia" => $sitesIgnoradosPorFrequencia,
     "logs" => $logs,
     "logs_email_novo_imovel" => $logsEmailNovoImovel,
     "resultado" => array_values($resultados),
