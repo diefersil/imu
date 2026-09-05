@@ -228,8 +228,11 @@ function imu_whatsapp_imovel_url_shortcode() {
     // =====================================================
     // URL INTERMEDIÁRIA
     //
-    // O clique passa primeiro pelo WordPress,
-    // envia o email e depois vai para o WhatsApp.
+    // Clique:
+    // 1. entra no WordPress
+    // 2. registra no banco
+    // 3. envia email
+    // 4. redireciona para WhatsApp
     // =====================================================
 
     $url = add_query_arg(
@@ -454,6 +457,18 @@ add_action(
 
 
         // =================================================
+        // REGISTRA CLIQUE NO BANCO
+        // =================================================
+
+        if ( function_exists( 'imu_registrar_clique_whatsapp' ) ) {
+
+            imu_registrar_clique_whatsapp(
+                $post_id
+            );
+        }
+
+
+        // =================================================
         // ENVIA EMAIL
         // =================================================
 
@@ -474,9 +489,7 @@ add_action(
         // =================================================
         // REDIRECIONA PARA WHATSAPP
         //
-        // IMPORTANTE:
-        // Usa wp_redirect() porque wa.me é domínio externo.
-        // wp_safe_redirect() bloquearia o redirecionamento.
+        // wp_redirect() porque wa.me é domínio externo.
         // =================================================
 
         wp_redirect(

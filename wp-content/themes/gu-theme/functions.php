@@ -261,6 +261,14 @@ function corta_titulo() {
 
 
 // =========================================================
+// REGISTROS DE CLIQUES WHATSAPP
+// =========================================================
+
+require_once get_stylesheet_directory()
+    . '/inc/whatsapp-imovel-registros.php';
+
+
+// =========================================================
 // WHATSAPP DOS IMÓVEIS
 // =========================================================
 
