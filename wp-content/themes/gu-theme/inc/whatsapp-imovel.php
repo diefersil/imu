@@ -963,7 +963,7 @@ add_action(
 
 
 // =========================================================
-// FORM WHATSAPP - SHOW / HIDE
+// FORM WHATSAPP - ABRIR / FECHAR
 // =========================================================
 
 add_action( 'wp_footer', function() {
@@ -976,156 +976,138 @@ add_action( 'wp_footer', function() {
 
     <style>
 
-    /* =====================================================
-       FORMULÁRIO INICIALMENTE FECHADO
-    ===================================================== */
+        /* Form fechado */
+        .imu-form-whatsapp {
+            display: none !important;
+            position: relative;
+        }
 
-    .imu-form-whatsapp {
-        display: none;
-        position: relative;
-    }
+        /* Form aberto */
+        .imu-form-whatsapp.imu-form-aberto {
+            display: flex !important;
+        }
 
+        /* Botão X */
+        .imu-fechar-form-whatsapp {
+            position: absolute;
+            top: 5px;
+            right: 5px;
 
-    /* =====================================================
-       FORMULÁRIO ABERTO
-    ===================================================== */
+            width: 32px;
+            height: 32px;
 
-    .imu-form-whatsapp.ativo {
-        display: block;
-    }
+            padding: 0 !important;
+            margin: 0 !important;
 
+            border: none !important;
+            background: transparent !important;
 
-    /* =====================================================
-       BOTÃO X
-    ===================================================== */
+            font-size: 28px;
+            line-height: 28px;
 
-    .imu-fechar-form-whatsapp {
+            cursor: pointer;
 
-        position: absolute;
-
-        top: 5px;
-        right: 5px;
-
-        width: 30px;
-        height: 30px;
-
-        padding: 0;
-
-        border: 0;
-
-        background: transparent;
-
-        font-size: 26px;
-
-        line-height: 30px;
-
-        cursor: pointer;
-
-        z-index: 10;
-    }
+            z-index: 999;
+        }
 
     </style>
 
 
     <script>
 
-    document.addEventListener(
-        'DOMContentLoaded',
-        function () {
+    document.addEventListener('DOMContentLoaded', function () {
 
-            // =============================================
-            // FORMULÁRIO
-            // =============================================
+        // =================================================
+        // ELEMENTOS
+        // =================================================
 
-            const form = document.querySelector(
-                '.imu-form-whatsapp'
-            );
+        const botao = document.querySelector(
+            '.imu-abrir-form-whatsapp'
+        );
 
-
-            if (!form) {
-                return;
-            }
+        const form = document.querySelector(
+            '.imu-form-whatsapp'
+        );
 
 
-            // =============================================
-            // CRIA BOTÃO X
-            // =============================================
+        // =================================================
+        // VERIFICAÇÕES
+        // =================================================
 
-            const fechar = document.createElement(
-                'button'
-            );
-
-
-            fechar.type =
-                'button';
-
-
-            fechar.className =
-                'imu-fechar-form-whatsapp';
-
-
-            fechar.innerHTML =
-                '&times;';
-
-
-            fechar.setAttribute(
-                'aria-label',
-                'Fechar formulário'
-            );
-
-
-            form.prepend(
-                fechar
-            );
-
-
-            // =============================================
-            // ABRIR / FECHAR AO CLICAR NO WHATSAPP
-            // =============================================
-
-            document.addEventListener(
-                'click',
-                function (event) {
-
-                    const botao =
-                        event.target.closest(
-                            '.imu-abrir-form-whatsapp'
-                        );
-
-
-                    if (!botao) {
-                        return;
-                    }
-
-
-                    event.preventDefault();
-
-
-                    form.classList.toggle(
-                        'ativo'
-                    );
-
-                }
-            );
-
-
-            // =============================================
-            // BOTÃO X
-            // =============================================
-
-            fechar.addEventListener(
-                'click',
-                function () {
-
-                    form.classList.remove(
-                        'ativo'
-                    );
-
-                }
-            );
-
+        if (!botao) {
+            console.log('IMU: botão WhatsApp não encontrado');
+            return;
         }
-    );
+
+        if (!form) {
+            console.log('IMU: formulário WhatsApp não encontrado');
+            return;
+        }
+
+
+        // =================================================
+        // CRIA BOTÃO X
+        // =================================================
+
+        const fechar = document.createElement('button');
+
+        fechar.type = 'button';
+
+        fechar.className =
+            'imu-fechar-form-whatsapp';
+
+        fechar.innerHTML =
+            '&times;';
+
+        fechar.setAttribute(
+            'aria-label',
+            'Fechar'
+        );
+
+        form.insertBefore(
+            fechar,
+            form.firstChild
+        );
+
+
+        // =================================================
+        // CLIQUE PARA ABRIR / FECHAR
+        // =================================================
+
+        botao.addEventListener(
+            'click',
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                form.classList.toggle(
+                    'imu-form-aberto'
+                );
+
+            }
+        );
+
+
+        // =================================================
+        // X PARA FECHAR
+        // =================================================
+
+        fechar.addEventListener(
+            'click',
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                form.classList.remove(
+                    'imu-form-aberto'
+                );
+
+            }
+        );
+
+    });
 
     </script>
 
