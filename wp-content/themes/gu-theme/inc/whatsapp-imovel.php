@@ -962,12 +962,14 @@ add_action(
 );
 
 
-// =========================================================
-// FORM WHATSAPP - ABRIR / FECHAR
+/// =========================================================
+// FORM WHATSAPP
+// ABRIR / FECHAR + EXPANDIR CONTAINER NO MOBILE
 // =========================================================
 
 add_action( 'wp_footer', function() {
 
+    // Somente na single de imóveis
     if ( ! is_singular( 'imoveis' ) ) {
         return;
     }
@@ -976,22 +978,37 @@ add_action( 'wp_footer', function() {
 
     <style>
 
-        /* Form fechado */
+        /* =====================================================
+           FORMULÁRIO FECHADO
+        ===================================================== */
+
         .imu-form-whatsapp {
             display: none !important;
             position: relative;
+            width: 100%;
         }
 
-        /* Form aberto */
+
+        /* =====================================================
+           FORMULÁRIO ABERTO
+        ===================================================== */
+
         .imu-form-whatsapp.imu-form-aberto {
             display: flex !important;
+            width: 100%;
         }
 
-        /* Botão X */
+
+        /* =====================================================
+           BOTÃO X
+        ===================================================== */
+
         .imu-fechar-form-whatsapp {
+
             position: absolute;
-            top: 5px;
-            right: 5px;
+
+            top: 0;
+            right: 0;
 
             width: 32px;
             height: 32px;
@@ -999,15 +1016,78 @@ add_action( 'wp_footer', function() {
             padding: 0 !important;
             margin: 0 !important;
 
-            border: none !important;
+            border: 0 !important;
+
             background: transparent !important;
 
-            font-size: 28px;
-            line-height: 28px;
+            color: #000;
+
+            font-size: 30px;
+            font-weight: 400;
+
+            line-height: 32px;
+
+            text-align: center;
 
             cursor: pointer;
 
-            z-index: 999;
+            z-index: 100;
+        }
+
+
+        /* =====================================================
+           MOBILE
+           QUANDO ABERTO, CONTATO OCUPA O GRID INTEIRO
+        ===================================================== */
+
+        @media (max-width: 767px) {
+
+            .imu-contato-container.imu-contato-expandido {
+
+                grid-column: 1 / -1 !important;
+
+                width: 100% !important;
+
+                max-width: 100% !important;
+
+                flex-basis: 100% !important;
+
+            }
+
+
+            /* Form também ocupa toda largura */
+
+            .imu-contato-container.imu-contato-expandido
+            .imu-form-whatsapp {
+
+                width: 100% !important;
+
+                max-width: 100% !important;
+
+            }
+
+
+            /* Widget Form do Elementor */
+
+            .imu-contato-container.imu-contato-expandido
+            .elementor-widget-form {
+
+                width: 100% !important;
+
+                max-width: 100% !important;
+
+            }
+
+
+            /* Form interno */
+
+            .imu-contato-container.imu-contato-expandido
+            .elementor-form {
+
+                width: 100% !important;
+
+            }
+
         }
 
     </style>
@@ -1015,99 +1095,190 @@ add_action( 'wp_footer', function() {
 
     <script>
 
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener(
+        'DOMContentLoaded',
+        function () {
 
-        // =================================================
-        // ELEMENTOS
-        // =================================================
+            // =================================================
+            // ELEMENTOS
+            // =================================================
 
-        const botao = document.querySelector(
-            '.imu-abrir-form-whatsapp'
-        );
+            const botao = document.querySelector(
+                '.imu-abrir-form-whatsapp'
+            );
 
-        const form = document.querySelector(
-            '.imu-form-whatsapp'
-        );
+            const form = document.querySelector(
+                '.imu-form-whatsapp'
+            );
 
-
-        // =================================================
-        // VERIFICAÇÕES
-        // =================================================
-
-        if (!botao) {
-            console.log('IMU: botão WhatsApp não encontrado');
-            return;
-        }
-
-        if (!form) {
-            console.log('IMU: formulário WhatsApp não encontrado');
-            return;
-        }
+            const contatoContainer = document.querySelector(
+                '.imu-contato-container'
+            );
 
 
-        // =================================================
-        // CRIA BOTÃO X
-        // =================================================
+            // =================================================
+            // VERIFICAÇÃO
+            // =================================================
 
-        const fechar = document.createElement('button');
+            if (!botao) {
 
-        fechar.type = 'button';
+                console.log(
+                    'IMU: botão de abrir formulário não encontrado.'
+                );
 
-        fechar.className =
-            'imu-fechar-form-whatsapp';
-
-        fechar.innerHTML =
-            '&times;';
-
-        fechar.setAttribute(
-            'aria-label',
-            'Fechar'
-        );
-
-        form.insertBefore(
-            fechar,
-            form.firstChild
-        );
+                return;
+            }
 
 
-        // =================================================
-        // CLIQUE PARA ABRIR / FECHAR
-        // =================================================
+            if (!form) {
 
-        botao.addEventListener(
-            'click',
-            function (event) {
+                console.log(
+                    'IMU: container do formulário não encontrado.'
+                );
 
-                event.preventDefault();
-                event.stopPropagation();
+                return;
+            }
 
-                form.classList.toggle(
-                    'imu-form-aberto'
+
+            if (!contatoContainer) {
+
+                console.log(
+                    'IMU: container de contato não encontrado.'
+                );
+
+                return;
+            }
+
+
+            // =================================================
+            // CRIA BOTÃO X
+            // =================================================
+
+            let fechar = form.querySelector(
+                '.imu-fechar-form-whatsapp'
+            );
+
+
+            if (!fechar) {
+
+                fechar = document.createElement(
+                    'button'
+                );
+
+
+                fechar.type =
+                    'button';
+
+
+                fechar.className =
+                    'imu-fechar-form-whatsapp';
+
+
+                fechar.innerHTML =
+                    '&times;';
+
+
+                fechar.setAttribute(
+                    'aria-label',
+                    'Fechar formulário'
+                );
+
+
+                form.prepend(
+                    fechar
                 );
 
             }
-        );
 
 
-        // =================================================
-        // X PARA FECHAR
-        // =================================================
+            // =================================================
+            // FUNÇÃO ABRIR
+            // =================================================
 
-        fechar.addEventListener(
-            'click',
-            function (event) {
+            function abrirFormulario() {
 
-                event.preventDefault();
-                event.stopPropagation();
+                form.classList.add(
+                    'imu-form-aberto'
+                );
+
+
+                contatoContainer.classList.add(
+                    'imu-contato-expandido'
+                );
+
+            }
+
+
+            // =================================================
+            // FUNÇÃO FECHAR
+            // =================================================
+
+            function fecharFormulario() {
 
                 form.classList.remove(
                     'imu-form-aberto'
                 );
 
-            }
-        );
 
-    });
+                contatoContainer.classList.remove(
+                    'imu-contato-expandido'
+                );
+
+            }
+
+
+            // =================================================
+            // CLIQUE NO "FALAR COM VENDEDOR"
+            // =================================================
+
+            botao.addEventListener(
+                'click',
+                function (event) {
+
+                    // Impede href="#"
+                    event.preventDefault();
+
+
+                    // Se estiver aberto, fecha.
+                    // Se estiver fechado, abre.
+
+                    if (
+                        form.classList.contains(
+                            'imu-form-aberto'
+                        )
+                    ) {
+
+                        fecharFormulario();
+
+                    } else {
+
+                        abrirFormulario();
+
+                    }
+
+                }
+            );
+
+
+            // =================================================
+            // CLIQUE NO X
+            // =================================================
+
+            fechar.addEventListener(
+                'click',
+                function (event) {
+
+                    event.preventDefault();
+
+                    event.stopPropagation();
+
+                    fecharFormulario();
+
+                }
+            );
+
+        }
+    );
 
     </script>
 
