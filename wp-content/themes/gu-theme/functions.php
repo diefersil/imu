@@ -1023,25 +1023,34 @@ add_action('transition_post_status', function ($new_status, $old_status, $post) 
 
 /**
  * ------------------------------------------------------------
- * ARCHIVES DE IMÓVEIS - GARANTIR POST TYPE CORRETO
+ * CORRIGIR ARCHIVES DAS TAXONOMIAS CIDADE E NEGOCIACAO
  * ------------------------------------------------------------
  */
 add_action( 'pre_get_posts', function( $query ) {
 
-    if ( is_admin() || ! $query->is_main_query() ) {
+    // Não executar no painel
+    if ( is_admin() ) {
         return;
     }
 
-    if (
-        is_tax( 'cidade' ) ||
-        is_tax( 'categoria' ) ||
-        is_tax( 'negociacao' )
-    ) {
-        $query->set( 'post_type', 'imoveis' );
-        $query->set( 'post_status', 'publish' );
+    // Somente a query principal do WordPress
+    if ( ! $query->is_main_query() ) {
+        return;
     }
 
-} );
+    // Somente os archives Cidade e Negociação
+    if (
+        ! $query->is_tax( 'cidade' ) &&
+        ! $query->is_tax( 'negociacao' )
+    ) {
+        return;
+    }
+
+    // Garante que a busca seja feita no CPT correto
+    $query->set( 'post_type', 'imoveis' );
+    $query->set( 'post_status', 'publish' );
+
+}, 999 );
 
 
 
