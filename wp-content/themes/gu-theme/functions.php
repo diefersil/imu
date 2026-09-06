@@ -1052,5 +1052,53 @@ add_action( 'pre_get_posts', function( $query ) {
 
 }, 999 );
 
+/**
+ * ------------------------------------------------------------
+ * DEBUG ARCHIVE TAXONOMIAS
+ * ------------------------------------------------------------
+ */
+add_action( 'wp_footer', function() {
+
+    if (
+        ! is_tax( 'cidade' ) &&
+        ! is_tax( 'negociacao' )
+    ) {
+        return;
+    }
+
+    global $wp_query;
+
+    echo '<pre style="
+        background:#111;
+        color:#0f0;
+        padding:20px;
+        font-size:13px;
+        overflow:auto;
+        position:relative;
+        z-index:999999;
+    ">';
+
+    echo "\nPOST TYPE:\n";
+    print_r( $wp_query->get( 'post_type' ) );
+
+    echo "\n\nTAXONOMY:\n";
+    print_r( $wp_query->get( 'taxonomy' ) );
+
+    echo "\n\nTERM:\n";
+    print_r( $wp_query->get( 'term' ) );
+
+    echo "\n\nTAX QUERY:\n";
+    print_r( $wp_query->get( 'tax_query' ) );
+
+    echo "\n\nFOUND POSTS:\n";
+    print_r( $wp_query->found_posts );
+
+    echo "\n\nSQL:\n";
+    print_r( $wp_query->request );
+
+    echo '</pre>';
+
+} );
+
 
 
