@@ -134,7 +134,7 @@ label,
 
 .swiper-slide-image {
   max-height: 350px !important;
-  min-height: 250px !important;
+  /*min-height: 250px !important;*/
 }
 
 
