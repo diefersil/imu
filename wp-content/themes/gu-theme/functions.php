@@ -1021,3 +1021,27 @@ add_action('transition_post_status', function ($new_status, $old_status, $post) 
 
 
 
+/**
+ * ------------------------------------------------------------
+ * ARCHIVES DE IMÓVEIS - GARANTIR POST TYPE CORRETO
+ * ------------------------------------------------------------
+ */
+add_action( 'pre_get_posts', function( $query ) {
+
+    if ( is_admin() || ! $query->is_main_query() ) {
+        return;
+    }
+
+    if (
+        is_tax( 'cidade' ) ||
+        is_tax( 'categoria' ) ||
+        is_tax( 'negociacao' )
+    ) {
+        $query->set( 'post_type', 'imoveis' );
+        $query->set( 'post_status', 'publish' );
+    }
+
+} );
+
+
+
