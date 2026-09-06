@@ -280,9 +280,9 @@ function imu_get_whatsapp_real_url(
 
 
     $msg .=
-        'Vi seu imóvel: ' .
+        'Vi seu imóvel: [' .
         $post_title .
-        ', no site Imóveis Unaí e gostaria de saber mais informações.';
+        '], no site Imóveis Unaí e gostaria de saber mais informações.';
 
 
     // =====================================================
