@@ -6,34 +6,84 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 
 // =========================================================
+// CONFIGURAÇÕES
+// =========================================================
+
+define(
+    'IMU_WHATSAPP_FORM_NAME',
+    'imu_whatsapp'
+);
+
+define(
+    'IMU_WHATSAPP_EMAIL_DESTINO',
+    'diefersil@gmail.com'
+);
+
+
+// =========================================================
 // DADOS DE CONTATO DO IMÓVEL
+//
+// AUTOR ID = 4
+// contato_nome
+// contato_fone
+// contato_whatsapp
+//
+// DEMAIS AUTORES
+// display_name
+// user_fone
+// user_whatsapp
 // =========================================================
 
 function imu_get_contato_imovel( $post_id ) {
+
+    $post_id = absint( $post_id );
+
+    if ( ! $post_id ) {
+        return false;
+    }
+
+
+    if ( get_post_type( $post_id ) !== 'imoveis' ) {
+        return false;
+    }
+
+
+    // =====================================================
+    // AUTOR DO IMÓVEL
+    // =====================================================
 
     $author_id = (int) get_post_field(
         'post_author',
         $post_id
     );
 
+
     if ( ! $author_id ) {
         return false;
     }
 
+
     $dados = [
+
         'author_id' => $author_id,
-        'nome'      => '',
-        'fone'      => '',
-        'whatsapp'  => '',
+
+        'nome' => '',
+
+        'fone' => '',
+
+        'whatsapp' => '',
     ];
 
 
     // =====================================================
     // AUTOR ID = 4
-    // Usa dados cadastrados diretamente no imóvel
+    // Dados cadastrados diretamente no imóvel
     // =====================================================
 
     if ( $author_id === 4 ) {
+
+
+        // Nome
 
         $dados['nome'] = get_post_meta(
             $post_id,
@@ -41,11 +91,17 @@ function imu_get_contato_imovel( $post_id ) {
             true
         );
 
+
+        // Fone
+
         $dados['fone'] = get_post_meta(
             $post_id,
             'contato_fone',
             true
         );
+
+
+        // WhatsApp
 
         $dados['whatsapp'] = get_post_meta(
             $post_id,
@@ -56,33 +112,45 @@ function imu_get_contato_imovel( $post_id ) {
 
     // =====================================================
     // DEMAIS AUTORES
-    // Usa dados cadastrados no usuário WordPress
+    // Dados cadastrados no usuário WordPress
     // =====================================================
 
     } else {
 
-        $user = get_userdata( $author_id );
+
+        $user = get_userdata(
+            $author_id
+        );
+
 
         if ( ! $user ) {
             return false;
         }
 
-        // Nome
-        $dados['nome'] = $user->display_name;
 
-        // Telefone
+        // Nome
+
+        $dados['nome'] =
+            $user->display_name;
+
+
+        // Fone
+
         $dados['fone'] = get_user_meta(
             $author_id,
             'user_fone',
             true
         );
 
+
         // WhatsApp
+
         $dados['whatsapp'] = get_user_meta(
             $author_id,
             'user_whatsapp',
             true
         );
+
     }
 
 
@@ -91,50 +159,83 @@ function imu_get_contato_imovel( $post_id ) {
 
 
 // =========================================================
+// NORMALIZA NÚMERO DE WHATSAPP
+// =========================================================
+
+function imu_normalizar_whatsapp( $numero ) {
+
+    $numero = preg_replace(
+        '/\D+/',
+        '',
+        (string) $numero
+    );
+
+
+    if ( empty( $numero ) ) {
+        return '';
+    }
+
+
+    // =====================================================
+    // CÓDIGO DO BRASIL
+    // =====================================================
+
+    if ( substr( $numero, 0, 2 ) !== '55' ) {
+
+        $numero =
+            '55' .
+            $numero;
+    }
+
+
+    return $numero;
+}
+
+
+// =========================================================
 // MONTA URL REAL DO WHATSAPP
 // =========================================================
 
-function imu_get_whatsapp_real_url( $post_id ) {
+function imu_get_whatsapp_real_url(
+    $post_id,
+    $nome_visitante = ''
+) {
+
+    $post_id = absint(
+        $post_id
+    );
+
+
+    if ( ! $post_id ) {
+        return '';
+    }
+
+
+    // =====================================================
+    // CONTATO DO ANUNCIANTE
+    // =====================================================
 
     $dados = imu_get_contato_imovel(
         $post_id
     );
 
+
     if ( ! $dados ) {
         return '';
     }
 
-    $whatsapp = $dados['whatsapp'];
-
 
     // =====================================================
-    // VERIFICA WHATSAPP
+    // WHATSAPP DO ANUNCIANTE
     // =====================================================
 
-    if ( empty( $whatsapp ) ) {
-        return '';
-    }
-
-
-    // Remove espaços, parênteses, traços etc.
-    $whatsapp = preg_replace(
-        '/\D+/',
-        '',
-        $whatsapp
+    $whatsapp = imu_normalizar_whatsapp(
+        $dados['whatsapp']
     );
 
+
     if ( empty( $whatsapp ) ) {
         return '';
-    }
-
-
-    // =====================================================
-    // ADICIONA CÓDIGO DO BRASIL
-    // =====================================================
-
-    if ( substr( $whatsapp, 0, 2 ) !== '55' ) {
-
-        $whatsapp = '55' . $whatsapp;
     }
 
 
@@ -148,55 +249,77 @@ function imu_get_whatsapp_real_url( $post_id ) {
 
 
     // =====================================================
-    // MENSAGEM DO WHATSAPP
+    // MENSAGEM
     // =====================================================
+
+    $msg = 'Olá';
+
+
+    // Nome do anunciante
 
     if ( ! empty( $dados['nome'] ) ) {
 
-        $msg =
-            'Olá, ' .
-            $dados['nome'] .
-            '. Vi seu imóvel: ' .
-            $post_title .
-            ', no site Imóveis Unaí e gostaria de saber mais informações.';
-
-    } else {
-
-        $msg =
-            'Olá. Vi seu imóvel: ' .
-            $post_title .
-            ', no site Imóveis Unaí e gostaria de saber mais informações.';
+        $msg .=
+            ', ' .
+            $dados['nome'];
     }
 
 
+    $msg .= '. ';
+
+
+    // Nome do visitante
+
+    if ( ! empty( $nome_visitante ) ) {
+
+        $msg .=
+            'Meu nome é ' .
+            $nome_visitante .
+            '. ';
+    }
+
+
+    $msg .=
+        'Vi seu imóvel: ' .
+        $post_title .
+        ', no site Imóveis Unaí e gostaria de saber mais informações.';
+
+
     // =====================================================
-    // URL FINAL DO WHATSAPP
+    // URL
     // =====================================================
 
-    return 'https://wa.me/' .
-           $whatsapp .
-           '?text=' .
-           rawurlencode( $msg );
+    return
+        'https://wa.me/' .
+        $whatsapp .
+        '?text=' .
+        rawurlencode( $msg );
 }
 
 
 // =========================================================
 // SHORTCODE
+//
 // [whatsapp_imovel_url]
+//
+// Este shortcode continua podendo ser utilizado no
+// botão/container que abre o formulário deslizante.
 // =========================================================
 
 function imu_whatsapp_imovel_url_shortcode() {
 
     // =====================================================
-    // IDENTIFICA O IMÓVEL ATUAL
+    // ID DO IMÓVEL ATUAL
     // =====================================================
 
     $post_id = get_queried_object_id();
+
 
     if ( ! $post_id ) {
 
         $post_id = get_the_ID();
     }
+
 
     if ( ! $post_id ) {
         return '';
@@ -204,7 +327,7 @@ function imu_whatsapp_imovel_url_shortcode() {
 
 
     // =====================================================
-    // GARANTE QUE É POST TYPE IMOVEIS
+    // POST TYPE
     // =====================================================
 
     if ( get_post_type( $post_id ) !== 'imoveis' ) {
@@ -220,6 +343,7 @@ function imu_whatsapp_imovel_url_shortcode() {
         $post_id
     );
 
+
     if ( empty( $whatsapp_url ) ) {
         return '';
     }
@@ -228,22 +352,18 @@ function imu_whatsapp_imovel_url_shortcode() {
     // =====================================================
     // URL INTERMEDIÁRIA
     //
-    // Clique:
-    // 1. entra no WordPress
-    // 2. registra no banco
-    // 3. envia email
-    // 4. redireciona para WhatsApp
+    // Você pode continuar usando esta URL no botão.
+    // O popup/form Elementor será aberto pelo próprio
+    // Elementor.
     // =====================================================
 
-    $url = add_query_arg(
-        [
-            'imu_whatsapp_click' => $post_id,
-        ],
-        home_url( '/' )
+    return esc_url(
+        add_query_arg(
+            'imu_whatsapp',
+            $post_id,
+            get_permalink( $post_id )
+        )
     );
-
-
-    return esc_url( $url );
 }
 
 
@@ -258,68 +378,370 @@ add_shortcode(
 
 
 // =========================================================
-// PROCESSA CLIQUE NO WHATSAPP
+// VALIDA FORMULÁRIO ELEMENTOR
+//
+// Form Name:
+// imu_whatsapp
 // =========================================================
 
 add_action(
-    'template_redirect',
-    function() {
+    'elementor_pro/forms/validation',
+    function( $record, $ajax_handler ) {
 
 
         // =================================================
-        // VERIFICA PARÂMETRO
+        // FORM NAME
         // =================================================
 
-        if ( empty( $_GET['imu_whatsapp_click'] ) ) {
+        $form_name = $record->get_form_settings(
+            'form_name'
+        );
+
+
+        if (
+            IMU_WHATSAPP_FORM_NAME !==
+            $form_name
+        ) {
+
             return;
         }
+
+
+        // =================================================
+        // CAMPOS
+        // =================================================
+
+        $raw_fields = $record->get(
+            'fields'
+        );
+
+
+        $fields = [];
+
+
+        foreach (
+            $raw_fields as
+            $id => $field
+        ) {
+
+            $fields[ $id ] =
+                isset( $field['value'] )
+                ? $field['value']
+                : '';
+        }
+
+
+        // =================================================
+        // NOME
+        // =================================================
+
+        $nome = isset( $fields['nome'] )
+            ? trim( $fields['nome'] )
+            : '';
+
+
+        if ( empty( $nome ) ) {
+
+            $ajax_handler->add_error(
+                'nome',
+                'Informe seu nome.'
+            );
+        }
+
+
+        // =================================================
+        // EMAIL
+        // =================================================
+
+        $email = isset( $fields['email'] )
+            ? trim( $fields['email'] )
+            : '';
+
+
+        if (
+            empty( $email ) ||
+            ! is_email( $email )
+        ) {
+
+            $ajax_handler->add_error(
+                'email',
+                'Informe um e-mail válido.'
+            );
+        }
+
+
+        // =================================================
+        // WHATSAPP
+        // =================================================
+
+        $whatsapp = isset( $fields['whatsapp'] )
+            ? preg_replace(
+                '/\D+/',
+                '',
+                $fields['whatsapp']
+            )
+            : '';
+
+
+        if (
+            empty( $whatsapp ) ||
+            strlen( $whatsapp ) < 10
+        ) {
+
+            $ajax_handler->add_error(
+                'whatsapp',
+                'Informe um WhatsApp válido.'
+            );
+        }
+
+
+        // =================================================
+        // IMÓVEL
+        // =================================================
+
+        $post_id = isset( $fields['imovel_id'] )
+            ? absint( $fields['imovel_id'] )
+            : 0;
+
+
+        if (
+            ! $post_id ||
+            get_post_type( $post_id ) !== 'imoveis'
+        ) {
+
+            $ajax_handler->add_error(
+                'imovel_id',
+                'Não foi possível identificar o imóvel.'
+            );
+        }
+
+    },
+    10,
+    2
+);
+
+
+// =========================================================
+// CAPTURA ENVIO DO FORMULÁRIO ELEMENTOR
+//
+// Executado depois que o formulário foi processado.
+// =========================================================
+
+add_action(
+    'elementor_pro/forms/new_record',
+    function( $record, $ajax_handler ) {
+
+
+        // =================================================
+        // IDENTIFICA O FORMULÁRIO
+        // =================================================
+
+        $form_name = $record->get_form_settings(
+            'form_name'
+        );
+
+
+        if (
+            IMU_WHATSAPP_FORM_NAME !==
+            $form_name
+        ) {
+
+            return;
+        }
+
+
+        // =================================================
+        // PEGA OS CAMPOS
+        // =================================================
+
+        $raw_fields = $record->get(
+            'fields'
+        );
+
+
+        $fields = [];
+
+
+        foreach (
+            $raw_fields as
+            $id => $field
+        ) {
+
+            $fields[ $id ] =
+                isset( $field['value'] )
+                ? $field['value']
+                : '';
+        }
+
+
+        // =================================================
+        // DADOS DO VISITANTE
+        // =================================================
+
+        $nome = isset( $fields['nome'] )
+            ? sanitize_text_field(
+                $fields['nome']
+            )
+            : '';
+
+
+        $email = isset( $fields['email'] )
+            ? sanitize_email(
+                $fields['email']
+            )
+            : '';
+
+
+        $whatsapp_visitante =
+            isset( $fields['whatsapp'] )
+            ? sanitize_text_field(
+                $fields['whatsapp']
+            )
+            : '';
 
 
         // =================================================
         // ID DO IMÓVEL
         // =================================================
 
-        $post_id = absint(
-            $_GET['imu_whatsapp_click']
-        );
+        $post_id =
+            isset( $fields['imovel_id'] )
+            ? absint(
+                $fields['imovel_id']
+            )
+            : 0;
+
 
         if ( ! $post_id ) {
             return;
         }
 
 
-        // =================================================
-        // GARANTE POST TYPE IMOVEIS
-        // =================================================
+        if (
+            get_post_type( $post_id )
+            !== 'imoveis'
+        ) {
 
-        if ( get_post_type( $post_id ) !== 'imoveis' ) {
             return;
         }
 
 
         // =================================================
-        // DADOS DO CONTATO
+        // ID DO AUTOR
         // =================================================
 
-        $dados = imu_get_contato_imovel(
-            $post_id
-        );
+        $autor_id =
+            (int) get_post_field(
+                'post_author',
+                $post_id
+            );
 
-        if ( ! $dados ) {
+
+        // =================================================
+        // DATA
+        // =================================================
+
+        $data =
+            current_time(
+                'mysql'
+            );
+
+
+        // =================================================
+        // IP
+        // =================================================
+
+        $ip = '';
+
+
+        if (
+            ! empty(
+                $_SERVER['REMOTE_ADDR']
+            )
+        ) {
+
+            $ip =
+                sanitize_text_field(
+                    wp_unslash(
+                        $_SERVER['REMOTE_ADDR']
+                    )
+                );
+        }
+
+
+        // =================================================
+        // CATEGORIA
+        // =================================================
+
+        $categorias =
+            wp_get_post_terms(
+                $post_id,
+                'categoria',
+                [
+                    'fields' => 'names',
+                ]
+            );
+
+
+        $categoria = '';
+
+
+        if (
+            ! is_wp_error( $categorias ) &&
+            ! empty( $categorias )
+        ) {
+
+            $categoria =
+                implode(
+                    ', ',
+                    $categorias
+                );
+        }
+
+
+        // =================================================
+        // DADOS DO CONTATO / ANUNCIANTE
+        // =================================================
+
+        $dados_contato =
+            imu_get_contato_imovel(
+                $post_id
+            );
+
+
+        if ( ! $dados_contato ) {
             return;
         }
 
 
         // =================================================
-        // URL REAL DO WHATSAPP
+        // GRAVA NA NOSSA TABELA
+        // =================================================
+        //
+        // A função de registros será ajustada para receber:
+        //
+        // imóvel
+        // nome
+        // email
+        // whatsapp
+        //
+        // Autor, categoria, data e IP são calculados
+        // dentro da própria função de registros.
         // =================================================
 
-        $whatsapp_url = imu_get_whatsapp_real_url(
-            $post_id
-        );
+        if (
+            function_exists(
+                'imu_registrar_clique_whatsapp'
+            )
+        ) {
 
-        if ( empty( $whatsapp_url ) ) {
-            return;
+            imu_registrar_clique_whatsapp(
+                $post_id,
+                $nome,
+                $email,
+                $whatsapp_visitante
+            );
+
         }
 
 
@@ -327,61 +749,24 @@ add_action(
         // DADOS DO IMÓVEL
         // =================================================
 
-        $titulo = get_the_title(
-            $post_id
-        );
-
-        $link_imovel = get_permalink(
-            $post_id
-        );
-
-
-        // =================================================
-        // DATA / HORA
-        // =================================================
-
-        $data_hora = current_time(
-            'd/m/Y H:i:s'
-        );
-
-
-        // =================================================
-        // IP DO VISITANTE
-        // =================================================
-
-        $ip = '';
-
-        if ( ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
-
-            $ip = sanitize_text_field(
-                wp_unslash(
-                    $_SERVER['REMOTE_ADDR']
-                )
+        $titulo =
+            get_the_title(
+                $post_id
             );
-        }
 
 
-        // =================================================
-        // PÁGINA DE ORIGEM
-        // =================================================
-
-        $referer = '';
-
-        if ( ! empty( $_SERVER['HTTP_REFERER'] ) ) {
-
-            $referer = esc_url_raw(
-                wp_unslash(
-                    $_SERVER['HTTP_REFERER']
-                )
+        $link_imovel =
+            get_permalink(
+                $post_id
             );
-        }
 
 
         // =================================================
         // EMAIL DE DESTINO
         // =================================================
 
-        $email_destino = 'diefersil@gmail.com';
+        $email_destino =
+            IMU_WHATSAPP_EMAIL_DESTINO;
 
 
         // =================================================
@@ -389,7 +774,7 @@ add_action(
         // =================================================
 
         $assunto =
-            'Clique no WhatsApp - ' .
+            'Novo Lead WhatsApp - ' .
             $titulo;
 
 
@@ -397,75 +782,136 @@ add_action(
         // CONTEÚDO DO EMAIL
         // =================================================
 
-        $mensagem = '';
+        $mensagem_email = '';
 
-        $mensagem .= "Novo clique no WhatsApp\n\n";
 
-        $mensagem .= "Imóvel: ";
-        $mensagem .= $titulo;
-        $mensagem .= "\n";
-
-        $mensagem .= "ID do imóvel: ";
-        $mensagem .= $post_id;
-        $mensagem .= "\n";
-
-        $mensagem .= "URL do imóvel: ";
-        $mensagem .= $link_imovel;
-        $mensagem .= "\n\n";
+        $mensagem_email .=
+            "NOVO LEAD - IMÓVEIS UNAÍ\n\n";
 
 
         // =================================================
-        // DADOS DO CONTATO
+        // VISITANTE
         // =================================================
 
-        $mensagem .= "Contato: ";
-        $mensagem .= $dados['nome'];
-        $mensagem .= "\n";
+        $mensagem_email .=
+            "DADOS DO INTERESSADO\n";
 
-        $mensagem .= "Fone: ";
-        $mensagem .= $dados['fone'];
-        $mensagem .= "\n";
-
-        $mensagem .= "WhatsApp: ";
-        $mensagem .= $dados['whatsapp'];
-        $mensagem .= "\n";
-
-        $mensagem .= "Autor ID: ";
-        $mensagem .= $dados['author_id'];
-        $mensagem .= "\n\n";
+        $mensagem_email .=
+            "------------------------------\n";
 
 
-        // =================================================
-        // DADOS DO CLIQUE
-        // =================================================
-
-        $mensagem .= "Data/Hora: ";
-        $mensagem .= $data_hora;
-        $mensagem .= "\n";
-
-        $mensagem .= "IP: ";
-        $mensagem .= $ip;
-        $mensagem .= "\n";
+        $mensagem_email .=
+            "Nome: " .
+            $nome .
+            "\n";
 
 
-        if ( ! empty( $referer ) ) {
+        $mensagem_email .=
+            "E-mail: " .
+            $email .
+            "\n";
 
-            $mensagem .= "Origem: ";
-            $mensagem .= $referer;
-            $mensagem .= "\n";
-        }
+
+        $mensagem_email .=
+            "WhatsApp: " .
+            $whatsapp_visitante .
+            "\n\n";
 
 
         // =================================================
-        // REGISTRA CLIQUE NO BANCO
+        // IMÓVEL
         // =================================================
 
-        if ( function_exists( 'imu_registrar_clique_whatsapp' ) ) {
+        $mensagem_email .=
+            "DADOS DO IMÓVEL\n";
 
-            imu_registrar_clique_whatsapp(
-                $post_id
-            );
-        }
+        $mensagem_email .=
+            "------------------------------\n";
+
+
+        $mensagem_email .=
+            "Imóvel: " .
+            $titulo .
+            "\n";
+
+
+        $mensagem_email .=
+            "ID do imóvel: " .
+            $post_id .
+            "\n";
+
+
+        $mensagem_email .=
+            "Categoria: " .
+            $categoria .
+            "\n";
+
+
+        $mensagem_email .=
+            "URL: " .
+            $link_imovel .
+            "\n\n";
+
+
+        // =================================================
+        // ANUNCIANTE
+        // =================================================
+
+        $mensagem_email .=
+            "DADOS DO ANUNCIANTE\n";
+
+        $mensagem_email .=
+            "------------------------------\n";
+
+
+        $mensagem_email .=
+            "Contato: " .
+            $dados_contato['nome'] .
+            "\n";
+
+
+        $mensagem_email .=
+            "Fone: " .
+            $dados_contato['fone'] .
+            "\n";
+
+
+        $mensagem_email .=
+            "WhatsApp: " .
+            $dados_contato['whatsapp'] .
+            "\n";
+
+
+        $mensagem_email .=
+            "Autor ID: " .
+            $autor_id .
+            "\n\n";
+
+
+        // =================================================
+        // ACESSO
+        // =================================================
+
+        $mensagem_email .=
+            "DADOS DO ACESSO\n";
+
+        $mensagem_email .=
+            "------------------------------\n";
+
+
+        $mensagem_email .=
+            "Data/Hora: " .
+            mysql2date(
+                'd/m/Y H:i:s',
+                $data
+            ) .
+            "\n";
+
+
+        $mensagem_email .=
+            "IP: " .
+            $ip .
+            "\n";
 
 
         // =================================================
@@ -475,28 +921,42 @@ add_action(
         wp_mail(
             $email_destino,
             $assunto,
-            $mensagem
+            $mensagem_email
         );
 
 
         // =================================================
-        // EVITA CACHE
+        // MONTA WHATSAPP DO ANUNCIANTE
         // =================================================
 
-        nocache_headers();
+        $whatsapp_url =
+            imu_get_whatsapp_real_url(
+                $post_id,
+                $nome
+            );
+
+
+        if ( empty( $whatsapp_url ) ) {
+            return;
+        }
 
 
         // =================================================
-        // REDIRECIONA PARA WHATSAPP
+        // REDIRECIONAMENTO ELEMENTOR AJAX
         //
-        // wp_redirect() porque wa.me é domínio externo.
+        // Não usamos wp_redirect() aqui porque o formulário
+        // do Elementor é enviado via AJAX.
+        //
+        // O redirect_url é devolvido para o frontend do
+        // Elementor.
         // =================================================
 
-        wp_redirect(
-            $whatsapp_url,
-            302
+        $ajax_handler->add_response_data(
+            'redirect_url',
+            $whatsapp_url
         );
 
-        exit;
-    }
+    },
+    10,
+    2
 );
